@@ -66,26 +66,39 @@ function auth(req, res, next) {
 }
 
 //User Register---------------------------------------------------------------------------------------------------------------
-app.post('/register',async(req,res) => {
-    const {username, email, password} = req.body;
-
-    const hashedPassword = await bcrypt.hash(password,10);
-
-    const user = new model({
-        username : username ,
-        email    : email   ,
-        password : hashedPassword
-    })
-    await user.save();
-
-    if(!username || !password){
+app.post('/register', async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
+  
+      if (!username || !password) {
         return res.status(400).json({ message: "Please enter username and password" });
-  }
-  if(user.username && username){
-    return res.send({ message: "username already exsits"})
-  }
-  res.send(user);
-})
+      }
+  
+      // Check if the username already exists
+      const existingUser = await model.findOne({ username });
+  
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+  
+      // If the username doesn't exist, proceed to create the new user
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+      const user = new model({
+        username: username,
+        email: email,
+        password: hashedPassword,
+      });
+  
+      await user.save();
+  
+      res.status(201).json({ message: "User registered successfully", user });
+    } catch (error) {
+      console.error("Error registering user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
 
 //User Login--------------------------------------------------------------------------------------------------------------
 app.post('/login',async(req,res) => {
