@@ -74,14 +74,12 @@ app.post('/register', async (req, res) => {
         return res.status(400).json({ message: "Please enter username and password" });
       }
   
-      // Check if the username already exists
       const existingUser = await model.findOne({ username });
   
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
   
-      // If the username doesn't exist, proceed to create the new user
       const hashedPassword = await bcrypt.hash(password, 10);
   
       const user = new model({
