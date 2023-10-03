@@ -103,6 +103,7 @@ const getForm = async (req, res) => {
     const userDetail = await model.findOne({ email });
 
     const formDetails = await FormModel.findOne({ name: userDetail.username });
+    console.log(userDetail);
 
     if (userDetail) {
       res.json(formDetails);
@@ -113,4 +114,75 @@ const getForm = async (req, res) => {
   }
 };
 
-module.exports = { register, login, form, getForm };
+// Update Form Data
+const updateForm = async (req, res) => {
+  try {
+    const email = req.user.email;
+    const userDetail = await model.findOne({ email });
+    if (!userDetail) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    const {
+      name,
+      description,
+      teamName,
+      numMembers,
+      location,
+      college,
+      phoneNumber,
+    } = req.body;
+
+    const formDetails = await FormModel.findOneAndUpdate(
+      { name: userDetail.username },
+      {
+        name,
+        description,
+        teamName,
+        numMembers,
+        location,
+        college,
+        phoneNumber,
+      },
+      { new: true }
+    );
+
+    if (formDetails) {
+      res.json({
+        message: "Form data updated successfully",
+        updatedForm: formDetails,
+      });
+    } else {
+      res.status(404).json({ message: "Form not found" });
+    }
+  } catch (error) {
+    console.error("Error updating form:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+ //delete from
+ const deleteForm = async(req,res) => {
+  try {
+   const email = req.user.email;
+   const userDetail = await model.findOne({ email })
+ 
+   if(!userDetail){
+     return res.status(401).json({ message: "user not found "})
+   }
+   const formDetails = await FormModel.findOneAndDelete({ name: userDetail.username });
+ 
+   if(formDetails){
+     res.json("form details deleted successfully")
+   }
+   else{
+     return  res.status(403).json({ message: 'no such form' })
+   }
+ 
+  } catch (error) {
+   console.error("error deleting form:", error);
+   res.status(500).json({message: "internal server error"})
+  }  
+ };
+
+module.exports = { register, login, form, getForm, updateForm, deleteForm };
