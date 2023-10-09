@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const router = require("./routes/user");
-
+const adminRouter = require("./routes/adminRout");
  
 
 const app = express();
@@ -24,6 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use("/api", router)
+app.use("/api", adminRouter)
 
 app.listen(PORT,(req,res) => {
     console.log(`Port running on ${PORT}` );

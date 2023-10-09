@@ -42,6 +42,8 @@ const register = async (req, res) => {
 
 //User Login--------------------------------------------------------------------------------------------------------------
 const login = async (req, res) => {
+
+  try{
   const { email, password } = req.body;
 
   const user = await model.findOne({ email });
@@ -59,6 +61,10 @@ const login = async (req, res) => {
   const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY);
 
   res.status(200).json({ message: "Login successfully", token });
+}catch(error){
+  console.error("Error user login:", error);
+  res.status(500).json({ message: "Internal server error" });
+}
 };
 
 // Form endpoint----------------------------------------------------------------------------------------------------------
