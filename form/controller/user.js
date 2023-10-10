@@ -4,17 +4,26 @@ const model = require("../models/userSchema");
 const FormModel = require("../models/formSchema");
 const dotenv = require("dotenv");
 dotenv.config();
-// console.log(dotenv);
 
-//User Register---------------------------------------------------------------------------------------------------------------
+// Email validation function
+function isEmailValid(email) {
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  return emailRegex.test(email);
+}
+
+// Password complexity validation function
+function isPasswordComplex(password) {
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8,}$/;
+  return passwordRegex.test(password);
+}
+
+// User Register
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: "Please enter username and password" });
+    if (!username || !password || !isEmailValid(email) || !isPasswordComplex(password)) {
+      return res.status(400).json({ message: "Invalid input data" });
     }
 
     const existingUser = await model.findOne({ username });
@@ -40,31 +49,34 @@ const register = async (req, res) => {
   }
 };
 
-//User Login--------------------------------------------------------------------------------------------------------------
+// User Login
 const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  try{
-  const { email, password } = req.body;
+    if (!isEmailValid(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
 
-  const user = await model.findOne({ email });
+    const user = await model.findOne({ email });
 
-  if (!user) {
-    return res.status(401).json({ message: "Invalid credentials" });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(503).json({ message: "Incorrect Password" });
+    }
+
+    const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY);
+
+    res.status(200).json({ message: "Login successfully", token });
+  } catch (error) {
+    console.error("Error user login:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-  // Compare the provided password with the hashed password in the database
-  const passwordMatch = await bcrypt.compare(password, user.password);
-
-  if (!passwordMatch) {
-    return res.status(503).json({ message: "Incorrect Password" });
-  }
-  // If the password matches, generate a JWT token
-  const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY);
-
-  res.status(200).json({ message: "Login successfully", token });
-}catch(error){
-  console.error("Error user login:", error);
-  res.status(500).json({ message: "Internal server error" });
-}
 };
 
 // Form endpoint----------------------------------------------------------------------------------------------------------

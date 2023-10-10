@@ -4,6 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const router = require("./routes/user");
 const adminRouter = require("./routes/adminRout");
+const dotenv = require("dotenv");
+dotenv.config();
  
 
 const app = express();
@@ -11,7 +13,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 
-const PORT = 5000;
+// const PORT = 5000;
+const PORT = process.env.PORT || 3000;
 
 mongoose.connect('mongodb://127.0.0.1:27017/userDB', {
     useNewUrlParser: true,
