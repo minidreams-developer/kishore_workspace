@@ -6,13 +6,12 @@ const FormModel = require("../models/formSchema");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// Email validation function
+// Email and password validation function
 function isEmailValid(email) {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
   return emailRegex.test(email);
 }
 
-// Password complexity validation function
 function isPasswordComplex(password) {
   const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8,}$/;
   return passwordRegex.test(password);
@@ -23,12 +22,12 @@ const adminRegister = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email format
+    // Validate email 
     if (!isEmailValid(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    // Validate password complexity
+    // Validate password 
     if (!isPasswordComplex(password)) {
       return res.status(400).json({ message: "Invalid password format" });
     }
